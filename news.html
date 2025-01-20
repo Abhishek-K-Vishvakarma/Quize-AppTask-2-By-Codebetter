@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic News Feed with Pagination</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .article-form {
+      margin-bottom: 20px;
+    }
+
+    .article-form input,
+    .article-form textarea,
+    .article-form button {
+      display: block;
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .news-feed {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .article {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .article img {
+      max-width: 100%;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      margin: 0 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .pagination button.active {
+      background-color: #007BFF;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Dynamic News Feed</h1>
+
+  <div class="article-form">
+    <input type="text" id="title" placeholder="Article Title" required>
+    <textarea id="description" placeholder="Article Description" rows="4" required></textarea>
+    <input type="text" id="imageUrl" placeholder="Image URL (optional)">
+    <button id="submitArticle">Add Article</button>
+  </div>
+
+  <div class="news-feed" id="newsFeed">
+    <!-- Articles will be displayed here -->
+  </div>
+
+  <div class="pagination" id="paginationControls">
+    <!-- Pagination buttons will be displayed here -->
+  </div>
+
+  <script>
+    const articles = [];
+    const articlesPerPage = 4;
+    let currentPage = 1;
+
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const imageUrlInput = document.getElementById('imageUrl');
+    const submitArticleButton = document.getElementById('submitArticle');
+    const newsFeed = document.getElementById('newsFeed');
+    const paginationControls = document.getElementById('paginationControls');
+
+    submitArticleButton.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const imageUrl = imageUrlInput.value.trim();
+
+      if (!title || !description) {
+        alert('Title and description are required.');
+        return;
+      }
+
+      articles.push({ title, description, imageUrl });
+      titleInput.value = '';
+      descriptionInput.value = '';
+      imageUrlInput.value = '';
+
+      renderArticles();
+      renderPagination();
+    });
+
+    function renderArticles() {
+      newsFeed.innerHTML = '';
+      const startIndex = (currentPage - 1) * articlesPerPage;
+      const endIndex = startIndex + articlesPerPage;
+      const currentArticles = articles.slice(startIndex, endIndex);
+
+      currentArticles.forEach(article => {
+        const articleDiv = document.createElement('div');
+        articleDiv.classList.add('article');
+
+        if (article.imageUrl) {
+          const img = document.createElement('img');
+          img.src = article.imageUrl;
+          articleDiv.appendChild(img);
+        }
+
+        const title = document.createElement('h2');
+        title.textContent = article.title;
+        articleDiv.appendChild(title);
+
+        const description = document.createElement('p');
+        description.textContent = article.description;
+        articleDiv.appendChild(description);
+
+        newsFeed.appendChild(articleDiv);
+      });
+    }
+
+    function renderPagination() {
+      paginationControls.innerHTML = '';
+      const totalPages = Math.ceil(articles.length / articlesPerPage);
+
+      const prevButton = document.createElement('button');
+      prevButton.textContent = 'Previous';
+      prevButton.disabled = currentPage === 1;
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderArticles();
+          renderPagination();
+        }
+      });
+      paginationControls.appendChild(prevButton);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        if (i === currentPage) {
+          pageButton.classList.add('active');
+        }
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          renderArticles();
+          renderPagination();
+        });
+        paginationControls.appendChild(pageButton);
+      }
+
+      const nextButton = document.createElement('button');
+      nextButton.textContent = 'Next';
+      nextButton.disabled = currentPage === totalPages;
+      nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderArticles();
+          renderPagination();
+        }
+      });
+      paginationControls.appendChild(nextButton);
+    }
+  </script>
+</body>
+
+</html>
